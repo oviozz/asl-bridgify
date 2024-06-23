@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 import os
 
 from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import TextLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 # app = Flask(__name__)
 
@@ -24,12 +26,52 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 loader = PyPDFLoader("American Sign Language The Easy Way (Stewart).pdf")
 pages = loader.load_and_split()
 
+
+with open("/Users/aahilali/Desktop/asl-bridgify/ASLtext.txt", "r", encoding="utf-8") as file:
+    text = file.read()
+print(text)
+
+class TextLoader:
+    def __init__(self, filepath):
+        self.filepath = filepath
+
+    def load(self):
+        with open(self.filepath, "r") as file:
+            return file.read()
+
+class Document:
+    def __init__(self, content, metadata=None):
+        self.content = content
+        self.metadata = metadata or {}
+
+class TextSplitter:
+    def __init__(self, delimiter="\n\n"):
+        self.delimiter = delimiter
+
+    def split(self, text):
+        return text.split(self.delimiter)
+
+# Example usage
+
+
+
+
+# text_splitter = RecursiveCharacterTextSplitter(
+#     # Set a really small chunk size, just to show.
+#     chunk_size=100,
+#     chunk_overlap=20,
+#     length_function=len,
+#     is_separator_regex=False,
+# )
+
+# texts = text_splitter.create_documents([asl_text])
+# print(texts)
 # Function to call Google Search API
 def google_search(query, num_results=10):
     url = f"https://www.googleapis.com/customsearch/v1"
     params = {
-        'key': '',
-        'cx': '',
+        'key': 'AIzaSyB1KY4MHbkXucegKL0f0CIaXvvPQeFZP-0',
+        'cx': '407779dc524074fb4',
         'q': query,
         'num': num_results
     }
@@ -41,8 +83,8 @@ def google_search(query, num_results=10):
 def google_search1(query, num_results=10):
     url = f"https://www.googleapis.com/customsearch/v1"
     params = {
-        'key':'',
-        'cx': '',
+        'key':'AIzaSyB1KY4MHbkXucegKL0f0CIaXvvPQeFZP-0',
+        'cx': '407779dc524074fb4',
         'q': query,
         'num': num_results
     }
@@ -67,18 +109,18 @@ def google_search1(query, num_results=10):
     return documents
 
 # Load ChatQA model and tokenizer
-llm = ChatOpenAI(api_key="", temperature=0)
+llm = ChatOpenAI(api_key="sk-proj-e55E248XEt1lI8Wi78pXT3BlbkFJlQxFwhqebN03i322y6hZ", temperature=0)
 
 # Function to create embeddings and FAISS index
 def create_faiss_index(strings, documents):
-    embedding_model = OpenAIEmbeddings(openai_api_key="")
+    embedding_model = OpenAIEmbeddings(openai_api_key="sk-proj-e55E248XEt1lI8Wi78pXT3BlbkFJlQxFwhqebN03i322y6hZ")
     document_embeddings = embedding_model.embed_documents(strings)
 
     dbIndex = FAISS.from_documents(documents, embedding_model)
     return dbIndex
 
 def create_pdf_faiss_index(documents):
-    embedding_model = OpenAIEmbeddings(openai_api_key="")
+    embedding_model = OpenAIEmbeddings(openai_api_key="sk-proj-e55E248XEt1lI8Wi78pXT3BlbkFJlQxFwhqebN03i322y6hZ")
     dbIndex = FAISS.from_documents(documents, embedding_model)
     return dbIndex
 
@@ -180,7 +222,7 @@ def answer_query_with_rag(user_query, system_instructions):
     return response
 
 # Example usage
-system_instructions = f"Please provide a detailed and comprehensive answer with actionable advice for improving ASL skills based on this user's profile: Include tips for improving letter, word, and sentence hand gesture formation, and emphasize the importance of facial expressions and body language."
-system_instructions1 = f"you are an ASL assistant that assists in users learning plans with bulleted out objectives for learning letters,words,and sentences"
-response = answer_query_with_rag("generate me an actionable american sign langauge learning plan", system_instructions1)
-print(response)
+# system_instructions = f"Please provide a detailed and comprehensive answer with actionable advice for improving ASL skills based on this user's profile: Include tips for improving letter, word, and sentence hand gesture formation, and emphasize the importance of facial expressions and body language."
+# system_instructions1 = f"you are an ASL assistant that assists in users learning plans with bulleted out objectives for learning letters,words,and sentences"
+# response = answer_query_with_rag("generate me an actionable american sign langauge learning plan", system_instructions1)
+# print(response)

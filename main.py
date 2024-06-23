@@ -5,10 +5,14 @@ from flask_cors import CORS
 from flask import Flask, request, Response, jsonify
 from camera import VideoCamera
 from scrape import scrape_signing_savvy
+<<<<<<< Updated upstream
 from wordDetectionLoading.model import callModel
 import mediapipe as mp
 import os
 
+=======
+from RAG import answer_query_with_rag
+>>>>>>> Stashed changes
 
 app = Flask(__name__)
 CORS(app)
@@ -99,6 +103,7 @@ def scrape():
 
     return jsonify({'mp4_url': video_url})
 
+<<<<<<< Updated upstream
 @app.route("/uploader", methods=['POST'])
 def upload_file():
     # Ensure the directory exists
@@ -127,6 +132,36 @@ def upload_file():
         }), 200
 
     return jsonify({'error': 'Unexpected error occurred'}), 500
+=======
+@app.route('/callRAG', methods=['GET'])
+def callRAG():
+    user_query = request.args.get('query')
+    if not user_query:
+        return jsonify({"error": "Query parameter is required"}), 400
+
+    system_instructions = "Please provide a detailed and comprehensive answer with actionable advice for improving ASL skills based on this user's profile: Include tips for improving letter, word, and sentence hand gesture formation, and emphasize the importance of facial expressions and body language."
+    
+    response = answer_query_with_rag(user_query, system_instructions)
+
+    return jsonify({"response": response.content})
+
+
+
+# @app.route('/calllearningPlanRAG', methods=['GET'])
+# def calllearningPlanRAG():
+#     user_query = request.args.get('query')
+#     if not user_query:
+#         return jsonify({"error": "Query parameter is required"}), 400
+
+#     system_instructions = "You are an american sign language assistant that provides structured learning plans for learning letters,words, and sentences"
+    
+#     response = answer_query_with_rag("generate me a beginner friendly american sign language learning roadmap", system_instructions)
+
+#     return jsonify({"response": response.content})
+
+
+
+>>>>>>> Stashed changes
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, threaded=True, use_reloader=False)
+    app.run(host='0.0.0.0', port=5001, threaded=True, use_reloader=False)
