@@ -11,7 +11,7 @@ import os
 
 from langchain_community.document_loaders import PyPDFLoader
 
-app = Flask(__name__)
+# app = Flask(__name__)
 
 documents = []
 metadatas = []
@@ -28,8 +28,8 @@ pages = loader.load_and_split()
 def google_search(query, num_results=10):
     url = f"https://www.googleapis.com/customsearch/v1"
     params = {
-        'key': API_KEY,
-        'cx': CSE_ID,
+        'key': '',
+        'cx': '',
         'q': query,
         'num': num_results
     }
@@ -41,8 +41,8 @@ def google_search(query, num_results=10):
 def google_search1(query, num_results=10):
     url = f"https://www.googleapis.com/customsearch/v1"
     params = {
-        'key': API_KEY,
-        'cx': CSE_ID,
+        'key':'',
+        'cx': '',
         'q': query,
         'num': num_results
     }
@@ -67,18 +67,18 @@ def google_search1(query, num_results=10):
     return documents
 
 # Load ChatQA model and tokenizer
-llm = ChatOpenAI(api_key=OPENAI_API_KEY, temperature=0)
+llm = ChatOpenAI(api_key="", temperature=0)
 
 # Function to create embeddings and FAISS index
 def create_faiss_index(strings, documents):
-    embedding_model = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
+    embedding_model = OpenAIEmbeddings(openai_api_key="")
     document_embeddings = embedding_model.embed_documents(strings)
 
     dbIndex = FAISS.from_documents(documents, embedding_model)
     return dbIndex
 
 def create_pdf_faiss_index(documents):
-    embedding_model = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
+    embedding_model = OpenAIEmbeddings(openai_api_key="")
     dbIndex = FAISS.from_documents(documents, embedding_model)
     return dbIndex
 
@@ -115,21 +115,10 @@ def answer_query_with_rag(user_query, system_instructions):
 
     return response
 
-@app.route('/scrape', methods=['GET'])
-def scrape():
-    user_query = request.args.get('query')
-    if not user_query:
-        return jsonify({"error": "Query parameter is required"}), 400
 
-    system_instructions = "Please provide a detailed and comprehensive answer with actionable advice for improving ASL skills based on this user's profile: Include tips for improving letter, word, and sentence hand gesture formation, and emphasize the importance of facial expressions and body language."
-    
-    response = answer_query_with_rag(user_query, system_instructions)
 
-    print(response)
-    return jsonify({"response": response.content})
-
-if __name__ == '__main__':
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     app.run(debug=True)
 
 def user_info(name, level_choices, goal_choices, institution, styles):
     levels = [
@@ -192,5 +181,6 @@ def answer_query_with_rag(user_query, system_instructions):
 
 # Example usage
 system_instructions = f"Please provide a detailed and comprehensive answer with actionable advice for improving ASL skills based on this user's profile: Include tips for improving letter, word, and sentence hand gesture formation, and emphasize the importance of facial expressions and body language."
-response = answer_query_with_rag("how to improve my signing of peoples names?", system_instructions)
+system_instructions1 = f"you are an ASL assistant that assists in users learning plans with bulleted out objectives for learning letters,words,and sentences"
+response = answer_query_with_rag("generate me an actionable american sign langauge learning plan", system_instructions1)
 print(response)
