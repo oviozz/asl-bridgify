@@ -6,7 +6,7 @@ import pickle
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import accuracy_score
 
 # mp_hands = mp.solutions.hands
@@ -18,7 +18,7 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(static_image_mode=True, max_num_hands=2, min_detection_confidence=0.5)
 
-data_dir = '/Users/aahilali/Desktop/ASL_Dataset'
+data_dir = '/Users/aahilali/Desktop/ASL_Dataset 2'
 data = []
 labels = []
 
@@ -30,7 +30,6 @@ if not os.path.exists(data_dir):
 def process_directory(directory):
     for root, _, files in os.walk(directory):
         for img_file in files:
-            img_file
             if img_file.lower().endswith(('.jpg', '.jpeg', '.png')):
                 data_aux = []
                 img_path = os.path.join(root, img_file)
@@ -65,58 +64,97 @@ if os.path.exists(test_dir):
 else:
     print(f"Warning: The directory '{test_dir}' does not exist.")
 
+# Check if all data samples have the same length
+max_length = max(len(sample) for sample in data)
+print(f"Max length of data samples: {max_length}")
+
+# Pad or truncate data samples to the same length
+data_padded = np.array([np.pad(sample, (0, max_length - len(sample))) if len(sample) < max_length else np.array(sample[:max_length]) for sample in data])
+labels = np.array(labels)
+
+print(f"Shape of data_padded: {data_padded.shape}")
+print(f"Shape of labels: {labels.shape}")
+
 # Save data
 with open('data.pickle', 'wb') as f:
     pickle.dump({'data': data, 'labels': labels}, f)
 
 print("Data processing complete and saved to 'data.pickle'")
 
-# visualize landmarks
 # data_dir = '/Users/aahilali/Desktop/ASL_Dataset'
-# for i in sorted(os.listdir(data_dir)):
-#     if i == '.DS_Store':
-#         pass
-#     else:
-#         for j in os.listdir(os.path.join(data_dir,i))[0:1]:
-#             img = cv2.imread(os.path.join(data_dir,i,j))
-#             img_rgb = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+for i in sorted(os.listdir(data_dir)):
+    if i == '.DS_Store':
+        continue
+    for j in os.listdir(os.path.join(data_dir, i))[0:1]:
+        img_path = os.path.join(data_dir, i, j)
+        img = cv2.imread(img_path)
 
-#             results = hands.process(img_rgb)
-#             if results.multi_hand_landmarks:
-#                 for hand_landmarks in results.multi_hand_landmarks:
-#                     mp_drawing.draw_landmarks(
-#                         img_rgb, # img to draw
-#                         hand_landmarks,
-#                         mp_hands.HAND_CONNECTIONS,
-#                         mp_drawing_styles.get_default_hand_landmarks_style(),
-#                         mp_drawing_styles.get_default_hand_connections_style()
+        if img is None:
+            print(f"Failed to load image: {img_path}")
+            continue
 
-#                     )
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        results = hands.process(img_rgb)
+        
+        if results.multi_hand_landmarks:
+            for hand_landmarks in results.multi_hand_landmarks:
+                mp_drawing.draw_landmarks(
+                    img_rgb,  # img to draw
+                    hand_landmarks,
+                    mp_hands.HAND_CONNECTIONS,
+                    mp_drawing_styles.get_default_hand_landmarks_style(),
+                    mp_drawing_styles.get_default_hand_connections_style()
+                )
+        
+        plt.figure()
+        plt.title(i)
+        plt.imshow(img_rgb)
+        
+plt.show()
 
-            
-#             plt.figure()
-#             plt.title(i)
-#             plt.imshow(img_rgb)
-# plt.show()
-
-# split data
+# Split data
 print('################got here#################')
 X_train, X_test, y_train, y_test = train_test_split(np.array(data), labels, test_size=0.15, random_state=22, shuffle=True)
 print('got here')
-# model
-model = RandomForestClassifier(random_state=22)
-model.fit(X_train,y_train)
+
+# Define parameter grid for GridSearchCV
+param_grid = {
+    'n_estimators': [100, 200, 300, 400, 500],
+    'max_depth': [None, 10, 20, 30, 40, 50],
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [1, 2, 4],
+    'max_features': ['auto', 'sqrt', 'log2']
+}
+
+# Initialize the model
+rf = RandomForestClassifier(random_state=22)
+
+# Perform grid search
+grid_search = GridSearchCV(estimator=rf, param_grid=param_grid, cv=5, n_jobs=-1, verbose=2)
+grid_search.fit(X_train, y_train)
+
+# Get the best model from grid search
+best_rf = grid_search.best_estimator_
+
+# Print the best parameters
+print("Best parameters found: ", grid_search.best_params_)
+
+# Fit the model with the best parameters
+best_rf.fit(X_train, y_train)
 print('got here2')
-# predict
-pred=model.predict(X_test)
+
+# Predict
+pred = best_rf.predict(X_test)
 print('got here 3')
-# accruracy
-accuracy_score(y_test,pred)
-print('got here 4') 
-# save model
-f = open('model.p', 'wb')
-pickle.dump({'model':model},f)
-f.close() 
+
+# Accuracy
+accuracy = accuracy_score(y_test, pred)
+print(f'Accuracy: {accuracy}')
+print('got here 4')
+
+# Save model
+with open('model.p', 'wb') as f:
+    pickle.dump({'model': best_rf}, f)
 
 print('got here 5')
 

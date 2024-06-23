@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../ASL_Dataset"
+		},
+		{
+			"path": "../raw_videos"
+		},
+		{
+			"path": "../ASL_Dataset 2"
+		}
+	],
+	"settings": {}
+}
