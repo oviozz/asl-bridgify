@@ -52,8 +52,8 @@ def callModel(handPoses):
         return predictedWord
 
 
-randTensor = torch.randn(200, 84)
-print(callModel(randTensor))
+# randTensor = torch.randn(200, 84)
+# print(callModel(randTensor))
 
 
 

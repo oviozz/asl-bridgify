@@ -18,6 +18,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 documents = []
 metadatas = []
 
+load_dotenv()
+
 # Load API keys from environment variables
 API_KEY = os.getenv('GOOGLE_API_KEY')
 CSE_ID = os.getenv('GOOGLE_CSE_ID')
@@ -27,29 +29,29 @@ loader = PyPDFLoader("American Sign Language The Easy Way (Stewart).pdf")
 pages = loader.load_and_split()
 
 
-with open("/Users/aahilali/Desktop/asl-bridgify/ASLtext.txt", "r", encoding="utf-8") as file:
-    text = file.read()
-print(text)
+# with open("/Users/aahilali/Desktop/asl-bridgify/ASLtext.txt", "r", encoding="utf-8") as file:
+#     text = file.read()
+# print(text)
 
-class TextLoader:
-    def __init__(self, filepath):
-        self.filepath = filepath
+# class TextLoader:
+#     def __init__(self, filepath):
+#         self.filepath = filepath
 
-    def load(self):
-        with open(self.filepath, "r") as file:
-            return file.read()
+#     def load(self):
+#         with open(self.filepath, "r") as file:
+#             return file.read()
 
-class Document:
-    def __init__(self, content, metadata=None):
-        self.content = content
-        self.metadata = metadata or {}
+# class Document:
+#     def __init__(self, content, metadata=None):
+#         self.content = content
+#         self.metadata = metadata or {}
 
-class TextSplitter:
-    def __init__(self, delimiter="\n\n"):
-        self.delimiter = delimiter
+# class TextSplitter:
+#     def __init__(self, delimiter="\n\n"):
+#         self.delimiter = delimiter
 
-    def split(self, text):
-        return text.split(self.delimiter)
+#     def split(self, text):
+#         return text.split(self.delimiter)
 
 # Example usage
 
@@ -70,8 +72,8 @@ class TextSplitter:
 def google_search(query, num_results=10):
     url = f"https://www.googleapis.com/customsearch/v1"
     params = {
-        'key': 'AIzaSyB1KY4MHbkXucegKL0f0CIaXvvPQeFZP-0',
-        'cx': '407779dc524074fb4',
+        'key': API_KEY,
+        'cx': CSE_ID,
         'q': query,
         'num': num_results
     }
@@ -83,8 +85,8 @@ def google_search(query, num_results=10):
 def google_search1(query, num_results=10):
     url = f"https://www.googleapis.com/customsearch/v1"
     params = {
-        'key':'AIzaSyB1KY4MHbkXucegKL0f0CIaXvvPQeFZP-0',
-        'cx': '407779dc524074fb4',
+        'key':API_KEY,
+        'cx': CSE_ID,
         'q': query,
         'num': num_results
     }
@@ -109,18 +111,18 @@ def google_search1(query, num_results=10):
     return documents
 
 # Load ChatQA model and tokenizer
-llm = ChatOpenAI(api_key="sk-proj-e55E248XEt1lI8Wi78pXT3BlbkFJlQxFwhqebN03i322y6hZ", temperature=0)
+llm = ChatOpenAI(api_key="", temperature=0)
 
 # Function to create embeddings and FAISS index
 def create_faiss_index(strings, documents):
-    embedding_model = OpenAIEmbeddings(openai_api_key="sk-proj-e55E248XEt1lI8Wi78pXT3BlbkFJlQxFwhqebN03i322y6hZ")
+    embedding_model = OpenAIEmbeddings(openai_api_key="")
     document_embeddings = embedding_model.embed_documents(strings)
 
     dbIndex = FAISS.from_documents(documents, embedding_model)
     return dbIndex
 
 def create_pdf_faiss_index(documents):
-    embedding_model = OpenAIEmbeddings(openai_api_key="sk-proj-e55E248XEt1lI8Wi78pXT3BlbkFJlQxFwhqebN03i322y6hZ")
+    embedding_model = OpenAIEmbeddings(openai_api_key="")
     dbIndex = FAISS.from_documents(documents, embedding_model)
     return dbIndex
 
