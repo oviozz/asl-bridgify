@@ -5,14 +5,11 @@ from flask_cors import CORS
 from flask import Flask, request, Response, jsonify
 from camera import VideoCamera
 from scrape import scrape_signing_savvy
-<<<<<<< Updated upstream
 from wordDetectionLoading.model import callModel
 import mediapipe as mp
 import os
 
-=======
 from RAG import answer_query_with_rag
->>>>>>> Stashed changes
 
 app = Flask(__name__)
 CORS(app)
@@ -103,10 +100,8 @@ def scrape():
 
     return jsonify({'mp4_url': video_url})
 
-<<<<<<< Updated upstream
 @app.route("/uploader", methods=['POST'])
 def upload_file():
-    # Ensure the directory exists
     process_video_dir = 'processVideoFile'
     ensure_directory(process_video_dir)
 
@@ -132,7 +127,7 @@ def upload_file():
         }), 200
 
     return jsonify({'error': 'Unexpected error occurred'}), 500
-=======
+
 @app.route('/callRAG', methods=['GET'])
 def callRAG():
     user_query = request.args.get('query')
@@ -160,8 +155,6 @@ def callRAG():
 #     return jsonify({"response": response.content})
 
 
-
->>>>>>> Stashed changes
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, threaded=True, use_reloader=False)
